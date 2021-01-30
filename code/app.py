@@ -7,7 +7,7 @@ from recording import record
 from css_loader import my_css
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model
-
+st.set_option('deprecation.showfileUploaderEncoding', False)
 my_css("style.css")
 
 
@@ -77,8 +77,14 @@ if __name__ == '__main__':
 
     if mainoption=="Upload Video":
         st.title("Upload Video")
-    
-    
+        file = st.file_uploader("Please upload a 10s Video",type=["mp4","mkv","avi"])
+        if file:
+            data = file.read()
+            vid = open(os.path.join('..','uploads',file.name),'wb')
+            vid.write(data)
+            vid.close()
+            st.success("Video Uploaded Successfully ! ")
+
     if mainoption=="Recognize Activity":
         st.title("Recognize Activity")
         
