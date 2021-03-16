@@ -10,8 +10,8 @@ import tensorflow as tf
 from collections import deque
 
 classes_list = ["WalkingWithDog", "Diving", "SkateBoarding", "HorseRace","PlayingPiano"]
-
-def predict_on_live_video(video_file_path, output_file_path, window_size):
+image_height ,image_width = 64,64
+def predict_on_live_video(video_file_path, output_file_path, window_size, model):
 
     # Initialize a Deque Object with a fixed size which will be used to implement moving/rolling average functionality.
     predicted_labels_probabilities_deque = deque(maxlen = window_size)
@@ -24,7 +24,7 @@ def predict_on_live_video(video_file_path, output_file_path, window_size):
     original_video_height = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # Writing the Overlayed Video Files Using the VideoWriter Object
-    video_writer = cv2.VideoWriter(output_file_path, cv2.VideoWriter_fourcc('M', 'P', '4', 'V'), 24, (original_video_width, original_video_height))
+    video_writer = cv2.VideoWriter(output_file_path, cv2.VideoWriter_fourcc(*"h264"), 24, (original_video_width, original_video_height))
 
     while True: 
 

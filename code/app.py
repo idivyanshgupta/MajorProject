@@ -8,6 +8,9 @@ from recording import record
 from css_loader import my_css
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model
+from prediction import predict_on_live_video
+from video_converter import convert_avi_to_mp4
+
 st.set_option('deprecation.showfileUploaderEncoding', False)
 my_css("style.css")
 
@@ -33,7 +36,7 @@ st.markdown(
 
 
 mainoption = st.sidebar.radio("Please select an option?",
-    ("Record Video","Upload Video", "Recognize Activity")
+    ("Record Video","Upload Video", "Recognize Activity","Recogzine in live video")
 )
 
 
@@ -84,11 +87,42 @@ if __name__ == '__main__':
         file = st.file_uploader("Please upload a 10s Video",type=["mp4","mkv","avi"])
         if file:
             data = file.read()
-            vid = open(os.path.join('..','uploads',file.name),'wb')
+            filepath = os.path.join('..','uploads',file.name)
+            vid = open(filepath,'wb')
             vid.write(data)
             vid.close()
             st.success("Video Uploaded Successfully ! ")
-            st.video(data)
+            if file.name.endswith('.avi'):
+                mp4name = f'{os.path.splitext(file.name)[0]}.mp4'
+                convert_avi_to_mp4(filepath,mp4name)   
+                filepath = os.path.join('..','uploads',mp4name)
+                st.video(open(filepath,'rb').read())
+            else:
+                st.video(data)
+    
+    if mainoption=="Recogzine in live video":
+        st.title('Recognize in Video. Browse to choose a video')
+        files = {}
+        for path, folder, fileset in os.walk(os.path.join('..','uploads')):
+            for file in fileset:
+                if file.endswith('.mp4'):
+                    files[file] = os.path.join(path,file)
+        video = st.selectbox('select video',tuple(files.keys()))
+        st.video(open(files[video], 'rb').read())
+        window_size = st.slider('Select a rolling window size',min_value=1, max_value=100,value=25)
+        st.warning('Time intensive process. It will take ta')
+        video_file_path = files[video]
+        output_file_path = os.path.join('..','output_video',f'out_{video}')
+        st.markdown(f"video will be saved at `{output_file_path}`")
+        start =  st.button('start recogniztion process')
+        
+        if start and os.path.exists(video_file_path) and os.path.exists('../model/activity_predict.h5') :
+            model=load_model("../model/activity_predict.h5")
+            with st.spinner("AI is reading the content in video, please wait..."):
+                predict_on_live_video(video_file_path,output_file_path,window_size,model)
+                st.success("Task completed")
+                st.video(open(output_file_path, 'rb').read())
+
 
     if mainoption=="Recognize Activity":
         st.title("Recognize Activity")
