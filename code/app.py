@@ -9,7 +9,7 @@ from css_loader import my_css
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model
 from prediction import predict_on_live_video
-from video_converter import convert_avi_to_mp4
+
 import shutil
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
