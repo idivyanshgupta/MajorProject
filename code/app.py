@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 from PIL import Image
+from collections import deque
 import numpy as np
 from recording import record
 from css_loader import my_css
@@ -10,7 +11,7 @@ from tensorflow.keras.models import load_model
 st.set_option('deprecation.showfileUploaderEncoding', False)
 my_css("style.css")
 
-
+classes_list = ["Walking With Dog", "Diving", "Skate Boarding", "Horse Race","Playing Piano"]
 sidebar_title = "<div><span class='highlight red'>Human Activity Recognition using CNN </span><br></br></div>"
 st.sidebar.markdown(sidebar_title, unsafe_allow_html=True)
 
@@ -32,13 +33,13 @@ st.markdown(
 
 
 mainoption = st.sidebar.radio("Please select an option?",
-    ("Record Video", "Upload Video", "Recognize Activity","View ")
+    ("Record Video","Upload Video", "Recognize Activity")
 )
 
 
 def file_display(option='.'):
     imagef = Image.open(option)
-    st.image(imagef, caption='Selected Image')
+    st.image(imagef, caption='Selected Image',width=400)
 
 
 def activity_predictor(image_path, model, w=32, h=32):
@@ -68,6 +69,9 @@ def file_selector(folder_path='.'):
 
 if __name__ == '__main__':
     # Select a file
+   
+        
+    
     if mainoption=="Record Video":
         
         st.title("Record Video")
@@ -84,6 +88,7 @@ if __name__ == '__main__':
             vid.write(data)
             vid.close()
             st.success("Video Uploaded Successfully ! ")
+            st.video(data)
 
     if mainoption=="Recognize Activity":
         st.title("Recognize Activity")
@@ -102,11 +107,10 @@ if __name__ == '__main__':
                     file_display(option=filename)
                     if os.path.exists("../model/activity_predict.h5"):
                             model=load_model("../model/activity_predict.h5")
+                          
                             pred = activity_predictor(image_path=filename,model=model)
-                            if np.argmax(pred,axis=-1)==0:
-                                st.write('The activity being performed is **Eating**.')
-                            else:
-                                st.write('Jogging')
+                            st.write(f"The activity being performed is **{classes_list[np.argmax(pred)]}**")
+                            
                     else:
                         st.error("No Model Found")
 
